@@ -1,16 +1,41 @@
 # coding=utf8
 from flask import Flask
-app = Flask(__name__)
+app = Flask(__name__,template_folder='templates')
 
-from flask import request, abort
+from flask import request, abort, render_template
 from linebot import  LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage,TextSendMessage, ImageSendMessage, StickerSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction
 
 import openai
+import time
+
+#======讓render不會睡著======
+import threading 
+import requests
+def wake_up_render():
+    while 1==1:
+        url = 'https://usrlinebot.onrender.com' + 'render_wake_up'
+        res = requests.get(url)
+        if res.status_code==200:
+            print('喚醒render成功')
+        else:
+            print('喚醒失敗')
+        time.sleep(13*60)
+
+threading.Thread(target=wake_up_render).start()
+#======讓render不會睡著======
 
 line_bot_api = LineBotApi('3P2FZBfbBBPvoGl+gx6OA3sNrZzyFmA2d8GirkolO74hEyDAXbruL5iWGPKJ08aoZ15p/mvO6yyMjqcgFdQ+RpLzqWshDLt2W0LG38TCzwduHazxqG6+9dsBgstdfRPdJlK9+J0lAuxU14D/cK65ygdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('17ba2f1582e0779e70e2737380b5a6e9')
+
+@app.route("/")
+def index():
+    return render_template("./index.html")
+
+@app.route("/render_wake_up")
+def render_wake_up():
+    return "Hey!Wake Up!!"
 
 @app.route("/callback", methods=['POST'])
 def callback():
